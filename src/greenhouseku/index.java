@@ -36,18 +36,26 @@ public class index extends javax.swing.JFrame implements Runnable {
  
        //read usb
     
-     private static String usb;
+     private  String usb;
 
-    public static String getUsb() {
+    public String getUsb() {
                String s1=usb;
         int s3 =s1.indexOf(":");
         String s2=s1.substring(0, s3);
         System.out.println("sub :"+s2);
-        return s2;
+        setSOIL(s2);
+                int s4 =s1.lastIndexOf(":");
+        
+           String s5 =s1.substring(s3+1, s1.length());
+           System.out.println(""+s5);
+            setLIGHTSUN(s5);
+                 soilMoisture.setText(s2+ " %");
+                lighsun.setText(s5+ " %");
+        return usb;
     }
 
-    public static void setUsb(String usb) {   
-        index.usb = usb;
+    public void setUsb(String usb) {   
+        this.usb = usb;
     }
     
     private String SOIL;
@@ -68,7 +76,10 @@ public class index extends javax.swing.JFrame implements Runnable {
     public void setLIGHTSUN(String LIGHTSUN) {
         this.LIGHTSUN = LIGHTSUN;
     }
-    public static void USB1()throws InterruptedException, IOException {
+    //####################################
+    //####  read data soil and sun   #####
+    //####################################
+    public  void USB1()throws InterruptedException, IOException {
 
         final Console console = new Console();
         // allow for user to exit program using CTRL-C
@@ -89,7 +100,7 @@ public class index extends javax.swing.JFrame implements Runnable {
                     console.println("[HEX DATA]   " + event.getHexByteString());
                     console.println("[ASCII DATA] " + event.getAsciiString());
                     setUsb(event.getAsciiString());
-                    System.out.println("11 "+getUsb());
+                    System.out.println(""+getUsb());
                  //   setAll(event.getAsciiString());
                    // System.out.println(""+event.getAsciiString());
                 } catch (IOException e) {
@@ -1170,7 +1181,20 @@ public class index extends javax.swing.JFrame implements Runnable {
     @Override
     public void run() {
               status.setText("   Server Start ... ");      
-            while (true) {            
+            while (true) {  
+            
+                //****************************
+                
+                  try {
+                      USB1();
+                      
+                  } catch (InterruptedException ex) {
+                      Logger.getLogger(index.class.getName()).log(Level.SEVERE, null, ex);
+                  } catch (IOException ex) {
+                      Logger.getLogger(index.class.getName()).log(Level.SEVERE, null, ex);
+                  }
+                  
+                  //*******************************
              
         String sql = "SELECT * FROM db.data ORDER BY temp_in DESC LIMIT 1";
          try {
@@ -1195,8 +1219,7 @@ public class index extends javax.swing.JFrame implements Runnable {
                 outTemp.setText(r.getString("temp_out"));
                 internal_humiditu.setText( r.getString("humidity_in")+ " %");
                 outside_humiditu.setText( r.getString("huminity_out")+ " %");
-                soilMoisture.setText(r.getString("soil")+ " %");
-                lighsun.setText(r.getString("light_sun")+ " %");
+               
                 
                 //lightBulb
             }
@@ -1210,46 +1233,9 @@ public class index extends javax.swing.JFrame implements Runnable {
 
         }
         }
-//        try {
-//            Thread.sleep(9000);
-//        } catch (InterruptedException ex) {
-//            Logger.getLogger(index.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        
-        
-        
-//        try {
-//                String sql2 ="SELECT * FROM DB.data ORDER BY temp_in DESC LIMIT 1";
-//       
-//            String driver = "com.mysql.jdbc.Driver";
-//            Class.forName(driver);
-//           Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mysql?zeroDateTimeBehavior=convertToNull","root","");
-//           PreparedStatement ps=con.prepareStatement(sql2);
-////   Statement st=(Statement) con.createStatement();
-//           ResultSet r=ps.executeQuery();
-//         
-//               while (r.next()) {
-//               System.out.println(""+r.getString("date"));
-//               System.out.println(""+r.getString("fan"));
-//               System.out.println(""+r.getString("light"));
-//               System.out.println(""+r.getString("pump"));
-//               System.out.println(""+r.getString("temp_in"));
-//               System.out.println(""+r.getString("temp_out"));
-//               System.out.println(""+r.getString("humidity_in"));
-//               System.out.println(""+r.getString("huminity_out"));
-//               System.out.println(""+r.getString("soil"));
-//               
-//               }
-//        } catch (Exception e) {
-//        }
+
     }
-      
-     
-//                
-//                
-          
-    
-    
+
     
     public String getFAN() {
         return FAN;
