@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package greenhouseku;
 
 import java.awt.Color;
@@ -16,6 +12,12 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import com.pi4j.io.serial.*;
+import com.pi4j.util.CommandArgumentParser;
+import com.pi4j.util.Console;
+
+import java.io.IOException;
+import java.util.Date;
 /**
  *
  * @author pi
@@ -32,7 +34,109 @@ public class index extends javax.swing.JFrame implements Runnable {
         next.hide();
     }
  
-       
+       //read usb
+    
+     private static String usb;
+
+    public static String getUsb() {
+               String s1=usb;
+        int s3 =s1.indexOf(":");
+        String s2=s1.substring(0, s3);
+        System.out.println("sub :"+s2);
+        return s2;
+    }
+
+    public static void setUsb(String usb) {   
+        index.usb = usb;
+    }
+    
+    private String SOIL;
+    private String LIGHTSUN;
+
+    public String getSOIL() {
+        return SOIL;
+    }
+
+    public void setSOIL(String SOIL) {
+        this.SOIL = SOIL;
+    }
+
+    public String getLIGHTSUN() {
+        return LIGHTSUN;
+    }
+
+    public void setLIGHTSUN(String LIGHTSUN) {
+        this.LIGHTSUN = LIGHTSUN;
+    }
+    public static void USB1()throws InterruptedException, IOException {
+
+        final Console console = new Console();
+        // allow for user to exit program using CTRL-C
+        console.promptForExit();
+        final Serial serial = SerialFactory.createInstance();
+
+        // create and register the serial data listener
+        serial.addListener(new SerialDataEventListener() {
+            @Override
+            public void dataReceived(SerialDataEvent event) {
+
+                // NOTE! - It is extremely important to read the data received from the
+                // serial port.  If it does not get read from the receive buffer, the
+                // buffer will continue to grow and consume memory.
+
+                // print out the data received to the console
+                try {
+                    console.println("[HEX DATA]   " + event.getHexByteString());
+                    console.println("[ASCII DATA] " + event.getAsciiString());
+                    setUsb(event.getAsciiString());
+                    System.out.println("11 "+getUsb());
+                 //   setAll(event.getAsciiString());
+                   // System.out.println(""+event.getAsciiString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        try {
+            // create serial config object
+            SerialConfig config = new SerialConfig();
+            config.device(SerialPort.getDefaultPort())
+                  .device("/dev/ttyACM0")
+                  .baud(Baud._9600);
+
+
+
+            // display connection details
+            console.box(" Connecting to: " + config.toString(),
+                    " We are sending ASCII data on the serial port every 1 second.",
+                    " Data received on serial port will be displayed below.");
+
+
+            // open the default serial device/port with the configuration settings
+            serial.open(config);
+            
+//            // continuous loop to keep the program running until the user terminates the program
+            while(console.isRunning()) {
+                try {
+                
+                }
+                catch(IllegalStateException ex){
+                    ex.printStackTrace();
+                }
+
+                // wait 1 second before continuing
+                Thread.sleep(0);
+            }
+
+        }
+        catch(IOException ex) {
+            console.println(" ==>> SERIAL SETUP FAILED : " + ex.getMessage());
+            return;
+        }
+    }
+    
+    //##################################################################3
 
     //create matod
     //passwd admin
@@ -1065,11 +1169,11 @@ public class index extends javax.swing.JFrame implements Runnable {
     int i=0;
     @Override
     public void run() {
-                    
+              status.setText("   Server Start ... ");      
             while (true) {            
-             status.setText("   Server Start ... ");
+             
         String sql = "SELECT * FROM db.data ORDER BY temp_in DESC LIMIT 1";
-        try {
+         try {
             String driver = "com.mysql.jdbc.Driver";
             Class.forName(driver);
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mysql?zeroDateTimeBehavior=convertToNull", "root", "");
